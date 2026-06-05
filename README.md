@@ -215,7 +215,7 @@ Overall, the project emphasises:
 * Dimensionality challenges
 
 ## Section 5: Documentation
-* [Project Data Sheet](https://github.com/jude22/ML-AI-Capstone-Project/docs/datasheet.md)
-* [Project Model Card](https://github.com/jude22/ML-AI-Capstone-Project/docs/modelcard.md)
+* [Project Data Sheet](https://github.com/jude22/ML-AI-Capstone-Project/blob/main/docs/datasheet.md)
+* [Project Model Card](https://github.com/jude22/ML-AI-Capstone-Project/blob/main/docs/modelcard.md)
 
 The iterative nature of the project reinforced the importance of evidence-based tuning, continuous reflection and adapting optimisation strategies as new information becomes available.
