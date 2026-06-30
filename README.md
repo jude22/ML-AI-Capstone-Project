@@ -1,4 +1,5 @@
-# Black-Box Optimisation (BBO) CProject
+# Black-Box Optimisation (BBO) Project
+### Imperial College ML/AI Certification 2026
 
 ## Section 1: Project Overview
 
@@ -54,7 +55,7 @@ These skills can be applied to real-world problems such as:
 
 ## Section 2: Inputs and Outputs
 
-The project receives numerical query vectors as inputs. Each function increases in dimensionality from **2D to 8D**, where each dimension represents a controllable parameter.
+Initial inputs and outputs data are provided by Imperial College ML/AI programme facilitors for each function which could be noisy and very limited. Each query involves submission of predicted inputs to the unknown function which will return an output.
 
 ### Example Input Format
 
@@ -92,130 +93,129 @@ The dataset grows weekly as new query results are collected and incorporated int
 
 ---
 
-## Section 3: Challenge Objectives
+## Section 3: Model (Approach and Selection)
 
-The primary objective is to maximise the unknown functions while operating under several constraints:
+This project applies **Bayesian Optimisation (BO)** to maximise eight unknown black-box functions (2D–8D) under a limited-query setting. Since each function evaluation is expensive and only one query is permitted per week, the objective is to identify high-performing inputs by efficiently learning from a small number of observations.
 
-* Unknown mathematical structure
-* Limited query opportunities
-* Expensive evaluations
-* Increasing dimensionality
-* Possible multimodal landscapes
+### Optimisation Models
 
-### Exploration vs Exploitation
+Several complementary models were used throughout the project, with model selection depending on the dimensionality, complexity and observed behaviour of each function.
 
-The optimisation process requires balancing:
+- **Gaussian Process (GP)** surrogate model with **Radial Basis Function (RBF)** kernel
+- **Soft-margin Support Vector Machine (SVM)** for classifying promising regions of the search space
+- **Neural Network Deep Ensemble** surrogate models for higher-dimensional functions
 
-* **Exploration** of uncertain regions
-* **Exploitation** of regions predicted to perform well
+Gaussian Processes formed the core optimisation framework because they perform well with small datasets while providing predictive means and uncertainty estimates required for Bayesian Optimisation. Upper Confidence Bound (UCB) was selected as the primary acquisition function due to its explicit control of the exploration–exploitation trade-off through the β (kappa) parameter, while Expected Improvement (EI) was evaluated as an alternative during the early stages.
 
-Some functions appear close to unimodal and favour exploitative strategies, while others exhibit behaviour suggesting local maxima, requiring more exploratory adjustments.
+For higher-dimensional functions where Gaussian Processes became less expressive, Neural Network Deep Ensemble surrogates were adopted to better capture complex response surfaces while maintaining uncertainty-aware optimisation through UCB. SVM classification was incorporated to identify promising regions before acquisition optimisation, improving search efficiency by focusing evaluations where high-performing solutions were more likely.
 
-### Learning Through Iteration
+Acquisition functions were optimised directly as continuous functions rather than over predefined candidate grids, avoiding the curse of dimensionality and improving computational efficiency.
 
-The project also requires careful interpretation of objectives. For example, one function was initially treated incorrectly as a minimisation problem before being corrected to maximisation in later rounds.
+### Model Evolution
+
+The optimisation strategy evolved from a single GP-based framework into a function-specific optimisation pipeline.
+
+Key developments across Weeks 2–13 included:
+
+- Hyperparameter tuning of RBF length scale, observation noise and UCB β (kappa) to balance exploration and exploitation.
+- Manual visualisation and heuristic query selection for the 2D problem (Function 1), where plotting helped identify promising regions after noisy observations.
+- Adaptive exploration strategies for multimodal functions and progressively exploitative tuning once convergence behaviour became evident.
+- Introduction of soft-margin SVM classification for Function 7 to guide Bayesian Optimisation towards promising regions.
+- Addition of ARD to Function 2 to better model the contribution of individual input dimensions.
+- Hybrid Bayesian Optimisation using Neural Network Deep Ensemble surrogates with UCB for Functions 4, 6 and 8 after sufficient data had accumulated.
+- Continuous evaluation of surrogate prediction accuracy and refinement of optimisation strategies based on observed performance.
+
+### Model Selection Justification
+
+Rather than adopting a single optimisation method for all eight functions, the final strategy selected models according to the characteristics of each optimisation problem.
+
+- **GP + UCB** remained the preferred solution for lower-dimensional problems because of its sample efficiency, uncertainty estimation and interpretability.
+- **GP + ARD + UCB** improved modelling of feature importance for Function 2.
+- **SVM + GP + UCB** improved optimisation efficiency for Function 7 by restricting search to promising regions.
+- **Neural Network Deep Ensemble + UCB** produced the strongest results for Functions 4, 6 and 8, where higher dimensionality justified a more expressive surrogate model.
+- Manual visualisation and heuristic guidance complemented Bayesian Optimisation for Function 1 when the search space could be inspected directly.
+
+By the final submission (Week 13), most functions had either converged or identified highly promising regions.
+
+## Section 4: Hyperparameter Optimisation
+
+Hyperparameter optimisation played a central role throughout the project. Rather than using fixed settings, hyperparameters were iteratively refined after each weekly submission based on the observed optimisation outcomes. The objective was to improve the surrogate model's ability to identify promising regions while maintaining an appropriate balance between exploration and exploitation.
+
+The main hyperparameters tuned were:
+
+| Hyperparameter | Purpose | Optimisation Strategy |
+|----------------|---------|-----------------------|
+| **RBF Length Scale** | Controls how quickly the surrogate model assumes the objective function changes. | Increased to encourage broader exploration when local optima were suspected, and reduced to focus exploitation around promising regions. |
+| **UCB β (Kappa)** | Controls the exploration–exploitation balance of the acquisition function. | Higher values promoted exploration during early rounds, while progressively lower values encouraged exploitation as confidence increased. |
+| **Observation Noise (Alpha)** | Represents uncertainty in observations and influences GP fitting. | Adjusted when noisy outcomes were suspected, particularly for Function 1, to improve model robustness. |
+| **ARD Length Scales** | Learns feature relevance independently for each input dimension. | Introduced for Function 2 to better model the contribution of individual variables. |
+| **Neural Network Learning Rate** | Controls optimisation speed for neural network ensemble surrogates. | Tuned to produce smoother surrogate predictions and improve optimisation stability. |
 
 ---
 
-## Section 4: Technical Approach
+## Section 5: Results
 
-This project uses a sequential Black-Box Optimisation (BBO) framework to identify high-performing inputs for eight unknown functions ranging from 2D to 8D. Since function evaluations are expensive and only one new query can be submitted per week, the focus is on learning efficiently from limited observations while balancing exploration and exploitation.
+The optimisation strategy evolved from a single Gaussian Process Bayesian Optimisation framework into a function-specific optimisation pipeline. Different functions exhibited different response surface characteristics, making tailored optimisation strategies consistently outperform a single generic approach.
 
-The optimisation strategy evolved significantly throughout the project as additional data became available and deeper insights were gained from previous outcomes.
+### Best Performing Strategies
 
-### Core Optimisation Method
+| Function | Final Strategy |
+|----------|----------------|
+| **Function 1** | GP + UCB with heuristic point selection, visualisation and noise filtering |
+| **Function 2** | GP + ARD + UCB with moderate exploration for multimodal search |
+| **Function 3** | GP + UCB with balanced exploration and exploitation |
+| **Function 4** | Neural Network Deep Ensemble + UCB with exploitative tuning |
+| **Function 5** | GP + UCB with balanced exploration and exploitation |
+| **Function 6** | Neural Network Deep Ensemble + UCB with increased exploitation |
+| **Function 7** | Soft-margin SVM + GP + UCB targeting promising regions |
+| **Function 8** | Neural Network Deep Ensemble + UCB with exploitative tuning |
 
-The primary optimisation framework is **Bayesian Optimisation (BO)** using:
+### Best Query Inous and Outputs
+F1
+Input: [0.425000, 0.429545]
+Output: 0.8286823864031674
 
-* Gaussian Process (GP) surrogate models
-* Radial Basis Function (RBF) kernels
-* Upper Confidence Bound (UCB) acquisition function
-* Expected Improvement (EI) acquisition function for comparison
+F2
+Input: [0.684524, 0.309524]
+Output: 0.6835811441905567
 
-The Gaussian Process surrogate was selected because it performs well on small datasets and provides both mean predictions and uncertainty estimates, allowing informed exploration of unknown regions.
+F3
+Input: [0.463099, 0.496023, 0.473688]
+Output: 0.008818623635985325
 
-Rather than relying on large predefined candidate grids, acquisition functions were directly optimised as continuous functions for higher-dimensional problems. This avoided the curse of dimensionality and significantly improved computational efficiency.
+F4
+Input: [0.348314, 0.382797, 0.401724, 0.362093]
+Output: 0.4908152329746014
 
-### Evolution of the Strategy
+F5
+Input: [1.000000, 0.985038, 0.893541, 0.908000]
+Output: 5438.448014038112
 
-#### Weeks 1–3: Exploration and Problem Understanding
+F6
+Input: [0.511005, 0.370966, 0.636673, 0.835488, 0.009609]
+Output: -0.2237771238234831
 
-The initial focus was on understanding the behaviour of each function and identifying whether they appeared unimodal or multimodal.
+F7
+Input: [0.151315, 0.120420, 0.430978, 0.281602, 0.315301, 0.692483]
+Output: 3.2264809068553113
 
-During this phase:
+F8
+Input: [0.267350, 0.192449, 0.043722, 0.045149, 0.560404, 0.584412, 0.035214, 0.981305]
+Output: 9.8041839160995
 
-* UCB was tuned to encourage exploration.
-* RBF length scales were adjusted to influence the correlation structure of the surrogate model.
-* Several functions revealed that excessive exploration produced poor outcomes.
-* Function 6 exposed an early modelling mistake where a maximisation task was incorrectly treated as minimisation.
 
-As more outcomes became available, the optimisation strategy shifted towards function-specific tuning rather than applying a common configuration across all functions.
+### Key Findings
 
-#### Weeks 4–6: Hyperparameter Refinement
+- Bayesian Optimisation using Gaussian Processes proved highly effective for low-dimensional problems with limited observations.
+- Neural Network Deep Ensemble surrogates significantly improved performance on higher-dimensional functions once sufficient data had been collected.
+- SVM classification successfully narrowed the search space by identifying promising regions before Bayesian Optimisation.
+- Careful tuning of RBF length scale and UCB β (kappa) had a greater impact on performance than changing acquisition functions.
+- Treating each function independently produced stronger results than applying a single optimisation strategy across all problems.
+- Poor-performing queries were valuable because they revealed unpromising regions, improving subsequent decisions.
 
-The next phase focused on improving acquisition behaviour through:
-
-* RBF length-scale tuning
-* UCB beta (κ) adjustment
-* Noise assumption tuning
-* Exploration–exploitation balancing
-
-This period highlighted the importance of understanding the interaction between kernel parameters and acquisition functions rather than tuning them independently.
-
-For low-dimensional problems, manual inspection of plots was occasionally used to guide exploration when model recommendations appeared unreliable.
-
-#### Weeks 6–10: Hybrid Models and Advanced Search
-
-As dataset sizes increased, additional techniques were introduced.
-
-##### SVM-Based Region Classification
-
-For Functions 7 and 8, a soft-margin Support Vector Machine (SVM) with an RBF kernel was used to classify promising and non-promising regions of the search space.
-
-The SVM predictions were combined with Bayesian Optimisation to focus acquisition optimisation within regions more likely to contain high-performing solutions.
-
-##### Neural Network Deep Ensemble Surrogates
-
-For Functions 6 and 8, a hybrid Bayesian Optimisation framework was introduced using:
-
-* Neural Network Deep Ensemble surrogate models
-* UCB acquisition function
-
-This approach was adopted because:
-
-* Input dimensionality was higher (5D and 8D)
-* Dataset sizes had grown sufficiently to support neural networks
-* Evaluations remained expensive
-* Improved uncertainty estimation was desirable
-
-These hybrid models produced the best outcomes observed for both functions.
-
-### Exploration vs Exploitation Strategy
-
-A key lesson throughout the project was that each function required a different balance between exploration and exploitation.
-
-* Functions suspected to be unimodal generally benefited from aggressive exploitation.
-* Functions displaying multimodal characteristics required longer exploratory phases.
-* Several functions initially became trapped in local optima, requiring deliberate increases in uncertainty or kernel length scales to encourage broader search.
-
-By Weeks 8–10, most functions had transitioned toward exploitative search as evidence suggested that strong-performing regions had already been identified.
-
-### Key Themes
-
-Overall, the project emphasises:
-
-* Iterative learning
-* Model interpretation
-* Hyperparameter tuning
-* Uncertainty-aware optimisation
-* Decision-making under incomplete knowledge
-* Adaptive search strategies
-* Surrogate model assumptions
-* Acquisition function behaviour
-* Dimensionality challenges
+Overall, the project demonstrated that successful black-box optimisation depends not only on selecting an appropriate surrogate model, but also on continuously refining hyperparameters, adapting strategies to the characteristics of each problem, and learning iteratively from every function evaluation.
 
 ## Section 5: Documentation
 * [Project Data Sheet](https://github.com/jude22/ML-AI-Capstone-Project/blob/main/docs/datasheet.md)
 * [Project Model Card](https://github.com/jude22/ML-AI-Capstone-Project/blob/main/docs/modelcard.md)
 
-The iterative nature of the project reinforced the importance of evidence-based tuning, continuous reflection and adapting optimisation strategies as new information becomes available.
