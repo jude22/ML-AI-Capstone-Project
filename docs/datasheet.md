@@ -1,119 +1,159 @@
 # Datasheet for the Black-Box Optimisation (BBO) Capstone Dataset
 
-## 1. Motivation
+## Motivation
 
-This dataset was created as part of a Black-Box Optimisation (BBO) capstone project designed to investigate optimisation strategies for unknown functions under limited evaluation budgets. The project simulates real-world optimisation problems where the internal structure of the objective function is unavailable and each function evaluation is expensive.
+This dataset was created as part of the **Black-Box Optimisation (BBO) Capstone Project** to investigate how optimisation algorithms can efficiently locate high-performing solutions when the objective function is unknown and expensive to evaluate.
 
-### Supported Tasks
+The dataset supports research and experimentation in:
 
-The dataset supports the development, evaluation and comparison of optimisation methods including:
+- Bayesian Optimisation
+- Gaussian Process surrogate modelling
+- Acquisition function optimisation (UCB and EI)
+- Support Vector Machine (SVM) classification of promising regions
+- Neural Network Deep Ensemble surrogate models
+- Sequential decision-making under limited evaluation budgets
 
-* Bayesian Optimisation
-* Gaussian Process surrogate modelling
-* Acquisition function optimisation (UCB and EI)
-* Support Vector Machine (SVM) classification of promising regions
-* Neural Network Deep Ensemble surrogate models
-
-The objective is to identify input configurations that maximise the output of eight unknown functions with increasing dimensionality.
-
----
-
-## 2. Composition
-
-The dataset consists of sequential optimisation observations collected across multiple weekly rounds.
-
-Each observation contains:
-
-* Function identifier (Function 1–8)
-* Input vector
-* Output value returned by the hidden function
-
-### Data Dimensions and Size
-
-| Function   | Input Dimensions | Initial Dataset Size | Output |
-| ---------- | ---------------- | -------------------- | ------ |
-| Function 1 | 2D               | 10                   | Scalar |
-| Function 2 | 2D               | 10                   | Scalar |
-| Function 3 | 3D               | 15                   | Scalar |
-| Function 4 | 4D               | 30                   | Scalar |
-| Function 5 | 4D               | 20                   | Scalar |
-| Function 6 | 5D               | 20                   | Scalar |
-| Function 7 | 6D               | 30                   | Scalar |
-| Function 8 | 8D               | 40                   | Scalar |
-
-
-### Known Gaps
-
-* The true functions are unknown.
-* Sampling is not uniformly distributed across the search space.
-* Later rounds contain more exploitative samples than exploratory samples.
-* Some regions remain unexplored.
+The overall objective is to maximise eight hidden functions that simulate realistic optimisation problems across multiple industries while learning efficiently from a limited number of expensive evaluations.
 
 ---
 
-## 3. Collection Process
+## Composition
 
-Queries were generated using an iterative optimisation workflow. Each week's query selection was informed by all previous observations and outcomes.
+### Function Overview
 
-Strategies evolved over time and included:
+| Function | Dimension | Real-World Scenario | Output Represents |
+|----------|-----------|---------------------|-------------------|
+| Function 1 | 2D | Detect contamination sources in a radiation field | Contamination reading |
+| Function 2 | 2D | Maximise ML model log-likelihood performance | ML score |
+| Function 3 | 3D | Drug discovery with side-effect minimisation | Side-effect score |
+| Function 4 | 4D | Warehouse product placement optimisation | Performance score |
+| Function 5 | 4D | Chemical process yield optimisation | Chemical yield |
+| Function 6 | 5D | Recipe optimisation balancing quality, cost and waste | Recipe penalty score |
+| Function 7 | 6D | Machine learning hyperparameter tuning | ML performance score |
+| Function 8 | 8D | High-dimensional ML system optimisation | ML score |
 
-* Gaussian Process Bayesian Optimisation
-* UCB acquisition function
-* Expected Improvement (EI)
-* Manual expert-guided exploration
-* SVM-based promising-region classification
-* Neural Network Deep Ensemble surrogates
+### Initial Dataset Size
 
-### Assumptions
+| Function | Initial Samples |
+|----------|-----------------|
+| Function 1 | 10 |
+| Function 2 | 10 |
+| Function 3 | 15 |
+| Function 4 | 30 |
+| Function 5 | 20 |
+| Function 6 | 20 |
+| Function 7 | 30 |
+| Function 8 | 40 |
 
-The collection process assumes:
-
-* Nearby points may contain improved solutions.
-* Historical observations provide useful information for future searches.
-* Surrogate models can approximate the hidden objective function.
+Each function returns a single scalar objective value that is treated as a **maximisation problem** throughout the project.
 
 ---
 
-## 4. Preprocessing and Intended Uses
+## Nature of the Data
 
-### Preprocessing Applied
+The initial dataset consists of an input matrix **X** and corresponding scalar output **y**.
 
-The following preprocessing and modelling decisions were used:
+- **Input:** N × D numerical array, where **D** represents the dimensionality of the function.
+- **Output:** N × 1 scalar objective values.
 
-* Feature scaling where required by optimisation models
-* Noise filtering in selected functions
-* Continuous optimisation of acquisition functions
-* Hyperparameter tuning of RBF length scales and UCB parameters
+Each week, one additional query is submitted for every function, causing the dataset to grow sequentially and allowing surrogate models to improve as more observations become available.
+
+Some functions exhibited noisy behaviour, particularly **Function 1**, where aggressive noise filtering was applied after identifying unreliable observations. Other functions appeared relatively smooth, while several higher-dimensional functions displayed evidence of local optima and multimodal behaviour based on surrogate predictions and optimisation performance.
+
+---
+
+## Collection Process
+
+The dataset was collected over **thirteen optimisation rounds** using sequential Bayesian Optimisation.
+
+Stragtegies for query generation evolved throughout the project and included:
+
+- Gaussian Process (RBF and Automatic Relevance Determination (ARD) kernels)
+- Upper Confidence Bound (UCB)
+- Expected Improvement (EI)
+- Manual heuristic point selection
+- Continuous optimisation of acquisition functions
+- SVM classification of promising regions
+- Neural Network Deep Ensemble surrogate models
+
+Each week's query selection was informed by all previous observations, making the optimisation progressively more informed while balancing exploration and exploitation.
+
+---
+
+## Data Handling and Preprocessing
+
+For functions with extremely small output magnitudes, output standardisation was applied before processing.
+
+This improved numerical stability during surrogate model training without changing the optimisation objective.
+
+Additional preprocessing included:
+
+- Feature scaling where appropriate
+- Noise filtering for noisy functions
+- Hyperparameter tuning of:
+  - RBF length scale
+  - ARD kernel parameters
+  - UCB β (κ)
+  - Observation noise assumptions
+- Continuous optimisation of acquisition functions instead of predefined search grids
+- Evaluation of Neural Network surrogate prediction accuracy before deployment
 
 ### Intended Uses
 
-Appropriate uses include:
-
-* Research into Bayesian Optimisation
-* Surrogate model evaluation
-* Exploration–exploitation studies
-* Hyperparameter optimisation research
-* Sequential decision-making experiments
+- Bayesian Optimisation research
+- Sequential optimisation benchmarking
+- Surrogate model comparison
+- Exploration–exploitation studies
+- Hyperparameter optimisation research
 
 ### Inappropriate Uses
 
-This dataset should not be used:
+This dataset should **not** be used for:
 
-* As a benchmark for supervised prediction tasks
-* To estimate processes outside this Capstone project
-* To make safety-critical decisions
-* To claim generalisable properties of unknown optimisation landscapes
+- Supervised learning benchmarks
+- Safety-critical decision making
+- Generalising properties of unknown optimisation landscapes beyond this project
 
 ---
 
-## 5. Distribution and Maintenance
+## Weekly Iteration and Learning
 
-The dataset is provided and maintained by Imperial Executive Education Programme.
+The optimisation strategy evolved from a single Gaussian Process framework into function-specific optimisation pipelines.
 
-### Terms of Use
+Early rounds focused on understanding whether each function appeared **unimodal** or **multimodal**. As more observations accumulated, strategies became increasingly specialised.
 
-The dataset is intended for educational, research and reproducibility purposes within the context of the capstone project.
+Key lessons included:
 
-Users should acknowledge that the underlying functions remain unknown and that observations are generated through sequential optimisation rather than random sampling.
+- Different functions required different exploration–exploitation balances.
+- Hybrid **Neural Network Deep Ensemble + UCB** models produced the strongest performance on several higher-dimensional problems.
+- **SVM classification** effectively narrowed the search to promising regions.
+- Manual reasoning and visual inspection remained valuable for low-dimensional noisy problems.
+- Hyperparameter tuning became increasingly important as surrogate confidence improved.
 
-This documentation supports responsible and transparent use of the dataset throughout the lifecycle of the project.
+---
+
+## Performance and Results
+
+Performance was evaluated using the objective value returned after each weekly submission.
+
+Across thirteen optimisation rounds:
+
+- **Gaussian Process + UCB** consistently performed well on low-dimensional and relatively smooth functions.
+- **Neural Network Deep Ensemble + UCB** produced the strongest results for higher-dimensional functions (Functions 4, 6 and 8).
+- **SVM-assisted Bayesian Optimisation** significantly improved Function 7.
+- Continuous tuning of kernel length scale, ARD, acquisition parameters and noise assumptions progressively improved optimisation performance.
+
+Confidence in the final solutions was highest where repeated exploitative queries consistently produced stable improvements and surrogate uncertainty had substantially reduced.
+
+---
+
+## Ethical, Practical and General Considerations
+
+This dataset reflects realistic optimisation challenges encountered in engineering, manufacturing, healthcare and machine learning, where experiments are expensive, uncertain and sequential.
+
+Because the underlying objective functions are **synthetic and hidden**, conclusions should not be directly generalised to real-world systems. However, the project provides practical insights into surrogate modelling, uncertainty-aware optimisation and adaptive decision-making.
+
+The optimisation strategies developed are applicable to many industrial optimisation problems, although larger-scale applications may require more scalable surrogate models, distributed optimisation and enhanced uncertainty estimation.
+
+Future users should recognise that optimisation performance depends strongly on surrogate model assumptions, preprocessing decisions, hyperparameter tuning and maintaining an appropriate balance between exploration and exploitation.
+
