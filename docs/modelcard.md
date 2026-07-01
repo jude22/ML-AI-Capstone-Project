@@ -12,7 +12,7 @@ Sequential Black-Box Optimisation Framework
 
 ### Version
 
-**v1.0 (Weeks 1–10 Capstone Submission)**
+**v1.1 (Weeks 1–13 Capstone Submission)**
 
 ### Summary
 
@@ -101,7 +101,7 @@ Applied to Functions 6 and 8:
 * UCB acquisition optimisation
 * Improved uncertainty estimation in higher dimensions
 
-### Weeks 9–10: Controlled Exploitation
+### Weeks 9–13: Controlled Exploitation
 
 This phase emphasised exploitation of identified promising regions while maintaining targeted exploration where performance plateaued.
 
